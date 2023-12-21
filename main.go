@@ -22,32 +22,65 @@ func main() {
 	}
     apiKey := os.Getenv("GPT_API_KEY") 
     client := resty.New()
+    
+    // 輸入題目
+    var topics string
+    fmt.Printf("Essay Topics in English: ")
+    fmt.Scan(&topics)
+    // 輸入文章
+    var essay string
+    fmt.Printf("Essay Content in English: ")
+    fmt.Scan(&essay)
 
-    response, err := client.R().
-        SetAuthToken(apiKey).
-        SetHeader("Content-Type", "application/json").
-        SetBody(map[string]interface{}{
-            "model":      "gpt-3.5-turbo",
-            "messages":   []interface{}{map[string]interface{}{"role": "system", "content": "Hi can you tell me what is the factorial of 10?"}},
-            "max_tokens": 50,
-        }).
-        Post(apiEndpoint)
+    var history = "Essay Topics: "+topics+"\nEssay Content: "+essay+"\n"
 
-    if err != nil {
-        log.Fatalf("Error while sending send the request: %v", err)
+    for {
+        response, err := client.R().
+            SetAuthToken(apiKey).
+            SetHeader("Content-Type", "application/json").
+            SetBody(map[string]interface{}{
+                "model":      "gpt-3.5-turbo",
+                "messages":   []interface{}{
+                    map[string]interface{}{
+                        "role":    "system",
+                        "content": "Please grade the following essay based on content, organization, grammar and sentence structure, and vocabulary and spelling. Each category should be scored from 1 to 5, with a total holistic score out of 20. Deduct 1 point in total score for essays significantly under the word count or not divided into paragraphs. Provide detailed scores and feedback for each category.",
+                    },
+                    map[string]interface{}{
+                        "role":    "user",
+                        "content": history,
+                    },
+                },
+                "max_tokens": 1024,
+            }).
+            Post(apiEndpoint)
+
+        if err != nil {
+            log.Fatalf("Error while sending send the request: %v", err)
+        }
+
+        body := response.Body()
+
+        var data map[string]interface{}
+        err = json.Unmarshal(body, &data)
+        if err != nil {
+            fmt.Println("Error while decoding JSON response:", err)
+            return
+        }
+
+        // 輸出回覆
+        content := data["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
+        fmt.Println(content)
+        history += "Graging Assistance: "+content+"\n"
+
+        // 輸入對話
+        var question string
+        fmt.Printf("You: ")
+        fmt.Scan(&question)
+        if question == "exit" {
+            fmt.Println("Prompt input closed.")
+            return
+        }
+        history += "You: "+question+"\n"
     }
-
-    body := response.Body()
-
-    var data map[string]interface{}
-    err = json.Unmarshal(body, &data)
-    if err != nil {
-        fmt.Println("Error while decoding JSON response:", err)
-        return
-    }
-
-    // Extract the content from the JSON response
-    content := data["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
-    fmt.Println(content)
 
 }
