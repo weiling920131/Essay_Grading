@@ -138,7 +138,7 @@ func main() {
         }
 
         // 輸出回覆
-        // content := data["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
+        content := data["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
         choices := data["choices"].([]interface{})
         if len(choices) > 0 {
             content := choices[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
