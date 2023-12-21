@@ -6,7 +6,14 @@ import (
     "fmt"
     "log"
     "os"
+    "strings"
+    "strconv"
 
+	// "github.com/fogleman/gg"
+	// "github.com/sajari/regression"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg"
     "github.com/go-resty/resty/v2"
     "github.com/joho/godotenv"
 )
@@ -14,6 +21,42 @@ import (
 const (
     apiEndpoint = "https://api.openai.com/v1/chat/completions"
 )
+
+func plotGrades(grades []int) {
+	p := plot.New()
+
+	// Create a bar chart for the grades
+	bars, err := plotter.NewBarChart(plotter.Values{
+		float64(grades[0]),
+		float64(grades[1]),
+		float64(grades[2]),
+		float64(grades[3]),
+	},
+		vg.Points(40),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Add the bars to the plot
+	p.Add(bars)
+
+	// Set labels for each bar
+	p.NominalX("Organization", "Content", "Grammar", "Vocabulary")
+
+	// Set the title and labels for the axes
+	p.Title.Text = "Grades Distribution"
+	p.X.Label.Text = "Categories"
+	p.Y.Label.Text = "Grades"
+
+    p.Y.Max = 5
+	// Save the plot to a file (you can also use p.Show() to display the plot)
+	if err := p.Save(4*vg.Inch, 4*vg.Inch, "grades_plot.png"); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Grades plot saved to grades_plot.png")
+}
 
 func main() {
     // Load environment variables from .env file
@@ -58,7 +101,7 @@ func main() {
             "messages": []interface{}{
                 map[string]interface{}{
                     "role":    "system",
-                    "content": "Please grade the following essay based on content, organization, grammar and sentence structure, and vocabulary and spelling. Each category should be scored from 1 to 5, with a total holistic score out of 20. Deduct 1 point in total score for essays significantly under the word count or not divided into paragraphs. Provide detailed scores and feedback for each category.",
+                    "content": "Please grade the following essay based on content, organization, grammar and sentence structure, and vocabulary and spelling. Each category should be scored from 1 to 5 and socres should be integer number, with a total holistic score out of 20. Deduct 1 point in total score for essays significantly under the word count or not divided into paragraphs. Provide detailed scores and feedback for each category. Write the grade in the format Content@Organization@Grammer@Vocabulary@Total in the first line of your response. For example, the first line should be 4@5@4@5@18",
                 },
                 map[string]interface{}{
                     "role":    "user",
@@ -87,7 +130,26 @@ func main() {
     choices := data["choices"].([]interface{})
     if len(choices) > 0 {
         content := choices[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
-        fmt.Println("Graded Essay Content:", content)
+        // fmt.Println("Graded Essay Content:", content)
+        lines := strings.Split(content, "\n")
+        grade := strings.Split(lines[0], "@")
+        var gradesInt []int
+        for _, gradeStr := range grade {
+            grade, err := strconv.Atoi(gradeStr)
+            if err != nil {
+                fmt.Printf("Error converting grade %s to integer: %v\n", gradeStr, err)
+                return
+            }
+            gradesInt = append(gradesInt, grade)
+        }
+        fmt.Printf("Grade Organizatoin: %d\n", gradesInt[0]);
+        fmt.Printf("Grade Content: %d\n", gradesInt[1]);
+        fmt.Printf("Grade Grammar: %d\n", gradesInt[2]);
+        fmt.Printf("Grade Vocabulary: %d\n", gradesInt[3]);
+        for _, line := range lines[1:] {
+            fmt.Printf("Feedback: %s\n", line)
+        }
+        plotGrades(gradesInt)
     } else {
         fmt.Println("No content returned in the response.")
     }
