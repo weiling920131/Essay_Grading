@@ -10,7 +10,6 @@ import (
     "github.com/joho/godotenv"
 )
 
-
 func main() {
     // Load environment variables from .env file
     err := godotenv.Load()
@@ -52,7 +51,7 @@ func main() {
         essayContent += scanner.Text() + "\n"
     }
 
-    // Check for errors during scanning
+    // // Check for errors during scanning
     if err := scanner.Err(); err != nil {
         log.Fatalf("Error reading from file: %v", err)
     }
