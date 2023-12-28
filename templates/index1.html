@@ -131,9 +131,65 @@
       // 显示用户消息
       chatHistory.innerHTML += `<div style="text-align: right; color: #007bff;">You: ${userInput}</div>`;
 
+      // Simulate receiving a JSON response from your backend
+      var jsonResponse = {
+          Ratings: {
+              Content: {
+                  Score: 4.5,
+                  Rewrite: "In this day and age, social media has taken the world by storm, making emojis an indispensable part of our daily lives.",
+                  Comments: "The essay presents a clear argument about the importance of emojis in today's society and provides reasons to support it. However, the argument could be more nuanced and detailed.",
+              },
+              Organization: {
+                  Score: 4,
+                  Rewrite: "Furthermore, emojis may seem flawless when used for communication, but they can actually lead to misunderstandings and confusion.",
+                  Comments: "The essay follows a logical structure and connects paragraphs well. However, the introduction and conclusion could be stronger and more impactful.",
+              },
+              "Grammar and Sentence Structure": {
+                  Score: 4,
+                  Rewrite: "I had a relevant experience in the past when I participated in a speech contest and achieved a good grade after months of hard work and training.",
+                  Comments: "The essay demonstrates a good range of sentence structures, but there are some minor grammatical errors and awkward phrasings.",
+              },
+              "Vocabulary and Spelling": {
+                  Score: 4.5,
+                  Rewrite: "Last but not least, it is essential that we should think twice before sending them and ensure that the facial expression can match our messages perfectly.",
+                  Comments: "The essay uses vocabulary effectively and shows good spelling overall, but there are a few minor errors.",
+              },
+          },
+          "Total Holistic Score": 17,
+      };
+
+      // Display the JSON response in the right column
+      const totalScore = jsonResponse["Total Holistic Score"];
+      const contentScore = jsonResponse.Ratings.Content.Score;
+      const contentRewrite = "Rewrite: " + jsonResponse.Ratings.Content.Rewrite;
+      const contentComments = "Comments: " + jsonResponse.Ratings.Content.Comments;
+      const organizationScore = jsonResponse.Ratings.Organization.Score;
+      const organizationRewrite = "Rewrite: " + jsonResponse.Ratings.Organization.Rewrite;
+      const organizationComments = "Comments: " + jsonResponse.Ratings.Organization.Comments;
+      const grammarScore = jsonResponse.Ratings["Grammar and Sentence Structure"].Score;
+      const grammarRewrite = "Rewrite: " + jsonResponse.Ratings["Grammar and Sentence Structure"].Rewrite;
+      const grammarComments = "Comments: " + jsonResponse.Ratings["Grammar and Sentence Structure"].Comments;
+      const vocabularyScore = jsonResponse.Ratings["Vocabulary and Spelling"].Score;
+      const vocabularyRewrite = "Rewrite: " + jsonResponse.Ratings["Vocabulary and Spelling"].Rewrite;
+      const vocabularyComments = "Comments: " + jsonResponse.Ratings["Vocabulary and Spelling"].Comments;
       // 模拟聊天机器人回复（替换为实际响应）
       const botResponse = "This is a bot response. Replace it with the actual response.";
-      chatHistory.innerHTML += `<div style="text-align: left; color: #333;">Bot: ${botResponse}</div>`;
+      chatHistory.innerHTML += `<div id="responseContainer">
+            <h2>Ratings</h2>
+                <h3>Total Holistic Score: ${totalScore}</h3>
+                <h3>Content: <span>${contentScore}</span></h3>
+                <pre>${contentRewrite}</pre>
+                <pre>${contentComments}</pre>
+                <h3>Organization: <span>${organizationScore}</span></h3>
+                <pre>${organizationRewrite}</pre>
+                <pre>${organizationComments}</pre>
+                <h3>Grammar and Sentence Structure: <span>${grammarScore}</span></h3>
+                <pre>${grammarRewrite}</pre>
+                <pre>${grammarComments}</pre>
+                <h3>Vocabulary and Spelling: <span>${vocabularyScore}</span></h3>
+                <pre>${vocabularyRewrite}</pre>
+                <pre>${vocabularyComments}</pre>
+        </div>`;
       
       
       // 滚动到聊天窗口底部

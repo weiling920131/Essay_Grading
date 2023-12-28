@@ -19,7 +19,7 @@ func main() {
 
 	// 定义首页路由
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
+		c.HTML(http.StatusOK, "index1.html", nil)
 	})
 
 	// 启动Web服务
