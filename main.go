@@ -2,18 +2,14 @@ package main
 
 import (
     "bufio"
-    "encoding/json"
     "fmt"
     "log"
     "os"
+    "time"
 
-    "github.com/go-resty/resty/v2"
     "github.com/joho/godotenv"
 )
 
-const (
-    apiEndpoint = "https://api.openai.com/v1/chat/completions"
-)
 
 func main() {
     // Load environment variables from .env file
@@ -28,15 +24,29 @@ func main() {
         log.Fatal("API key is not set in environment variables")
     }
 
-    // Open the essay.txt file
-    file, err := os.Open("essay.txt") // Replace with the actual path to your .txt file
-    if err != nil {
-        log.Fatalf("Error opening file: %v", err)
-    }
-    defer file.Close()
+    // // Read the topic from topic.txt
+    // topicFile, err := os.Open("topic.txt")
+    // if err != nil {
+    //     log.Fatalf("Error opening topic file: %v", err)
+    // }
+    // defer topicFile.Close()
 
-    // Read the file content
-    scanner := bufio.NewScanner(file)
+    // scanner := bufio.NewScanner(topicFile)
+    // topicContent := ""
+    // for scanner.Scan() {
+    //     topicContent += scanner.Text() + "\n"
+    // }
+    // description := "Essay Topic: "
+    // topicContent = description + topicContent
+
+    // Read the essay from essay.txt
+    essayFile, err := os.Open("essay.txt")
+    if err != nil {
+        log.Fatalf("Error opening essay file: %v", err)
+    }
+    defer essayFile.Close()
+
+    scanner := bufio.NewScanner(essayFile)
     essayContent := ""
     for scanner.Scan() {
         essayContent += scanner.Text() + "\n"
@@ -47,48 +57,52 @@ func main() {
         log.Fatalf("Error reading from file: %v", err)
     }
 
-    // Set up the resty client and make the API call
-    client := resty.New()
-
-    response, err := client.R().
-        SetAuthToken(apiKey).
-        SetHeader("Content-Type", "application/json").
-        SetBody(map[string]interface{}{
-            "model": "gpt-3.5-turbo",
-            "messages": []interface{}{
-                map[string]interface{}{
-                    "role":    "system",
-                    "content": "Please grade the following essay based on content, organization, grammar and sentence structure, and vocabulary and spelling. Each category should be scored from 1 to 5, with a total holistic score out of 20. Deduct 1 point in total score for essays significantly under the word count or not divided into paragraphs. Provide detailed scores and feedback for each category.",
-                },
-                map[string]interface{}{
-                    "role":    "user",
-                    "content": essayContent,
-                },
-            },
-            "max_tokens": 1024, // Adjust this value as needed for the length of the response
-        }).
-        Post(apiEndpoint)
-
-    // Check for errors in the API response
+    // API 1
+    thread, err := CreateThread()
     if err != nil {
-        log.Fatalf("Error while sending the request: %v", err)
+        fmt.Println("Error:", err)
+        return
     }
 
-    // Decode the JSON response
-    body := response.Body()
+    // Print the ID of the thread
+    fmt.Printf("Thread ID: %s\n", thread.ID)
 
-    var data map[string]interface{}
-    err = json.Unmarshal(body, &data)
+    // API 2
+    _, err = CreateThreadMessage(thread.ID, essayContent)
     if err != nil {
-        log.Fatalf("Error while decoding JSON response: %v", err)
+        fmt.Println("Error:", err)
+        return
     }
 
-    // Extract the content from the JSON response
-    choices := data["choices"].([]interface{})
-    if len(choices) > 0 {
-        content := choices[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
-        fmt.Println("Graded Essay Content:", content)
-    } else {
-        fmt.Println("No content returned in the response.")
+    // fmt.Printf("Thread message created: %+v\n", threadMessage)
+
+    // API 3
+    _, err = CreateThreadRun(thread.ID, "asst_rfyem8YCJcbmaiexwlHLO4YX")
+    if err != nil {
+        fmt.Println("Error:", err)
+        return
     }
+    
+    // add delay for 5 seconds
+    time.Sleep(5 * time.Second)
+    
+    // API 4
+    // threadID := "thread_qRFXumnhkErUDecZjuFBbRHC"
+    messages := GetMessages(thread.ID)
+
+    print(messages)
+
+    // API 5
+    runs, err := ListThreadRuns(thread.ID)
+    if err != nil {
+        fmt.Println("Error:", err)
+        print("Error:", err)
+    }
+    for _, run := range runs.Data {
+        fmt.Printf("Run ID: %s, Status: %s\n", run.ID, run.Status)
+    }
+
+    
+
+    
 }
