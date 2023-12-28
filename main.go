@@ -22,7 +22,7 @@ const (
     apiEndpoint = "https://api.openai.com/v1/chat/completions"
 )
 
-func plotGrades(grades []int) {
+func plotGrades(grades []float64) {
 	p := plot.New()
 
 	// Create a bar chart for the grades
@@ -113,7 +113,7 @@ func main() {
                 "messages":   []interface{}{
                     map[string]interface{}{
                         "role":    "system",
-                        "content": "Please grade the following essay based on content, organization, grammar and sentence structure, and vocabulary and spelling. Each category should be scored from 1 to 5 and socres should be integer number, with a total holistic score out of 20. Deduct 1 point in total score for essays significantly under the word count or not divided into paragraphs. Provide detailed scores and feedback for each category. Write the grade in the format Content@Organization@Grammer@Vocabulary@Total in the first line of your response. For example, the first line should be 4@5@4@5@18",
+                        "content": "Grade the following essay by the English composition section of Taiwan's general scholastic ability test. The rubric should cover five key areas: 'Content,' 'Organization,' 'Grammar and Sentence Structure,' and 'Vocabulary and Spelling.' Each area must include four performance levels: 'Good,' 'Average,' 'Bad,' and 'Poor.' 'Good' in 'Content' reflects a nuanced and thorough argument or narrative, while 'Poor' indicates a narrative or argument that is both unclear and incomplete. For 'Organization,' 'Good' compositions should showcase a clear and logical structure with well-connected paragraphs, whereas 'Poor' compositions are disorganized and disjointed. 'Grammar and Sentence Structure' must distinguish 'Good' work, which features a diverse range of accurately constructed sentences free of grammatical errors, from 'Poor' work that is marred by consistent grammatical and structural issues. 'Vocabulary and Spelling' must be judged from 'Good,' showing flawless spelling, to 'Poor,' indicating numerous spelling mistakes. Assign score ranges to each level as follows: 'Good' corresponds to (5-4.5 points), 'Average' to (4 points), 'Bad' to (3-1 points), and 'Poor' to (0 points). Provide detailed scores and feedback for each category with a total holistic score out of 20. Deduct 1 point in total score for essays significantly under the word count or not divided into paragraphs. Provide detailed scores and feedback for each category. Write the grade in the format Content@Organization@Grammer@Vocabulary@Total in the first line of your response. For example, the first line should be 4@5@4@5@18",
                     },
                     map[string]interface{}{
                         "role":    "user",
@@ -127,27 +127,28 @@ func main() {
         if err != nil {
             log.Fatalf("Error while sending send the request: %v", err)
         }
-
+        
         body := response.Body()
-
+        
         var data map[string]interface{}
         err = json.Unmarshal(body, &data)
         if err != nil {
             fmt.Println("Error while decoding JSON response:", err)
             return
         }
-
+        
         // 輸出回覆
-        content := data["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
+        answer := data["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
+        fmt.Println(answer)
         choices := data["choices"].([]interface{})
         if len(choices) > 0 {
             content := choices[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
             // fmt.Println("Graded Essay Content:", content)
             lines := strings.Split(content, "\n")
             grade := strings.Split(lines[0], "@")
-            var gradesInt []int
+            var gradesInt []float64
             for _, gradeStr := range grade {
-                grade, err := strconv.Atoi(gradeStr)
+                grade, err := strconv.ParseFloat(gradeStr, 64)
                 if err != nil {
                     fmt.Printf("Error converting grade %s to integer: %v\n", gradeStr, err)
                     return
@@ -165,8 +166,7 @@ func main() {
         } else {
             fmt.Println("No content returned in the response.")
         }
-        fmt.Println(content)
-        history += "Graging Assistance: "+content+"\n"
+        history += "Graging Assistance: "+answer+"\n"
 
         // 輸入對話
         var question string
