@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+    "github.com/joho/godotenv"
 )
 
 // ThreadResponse represents the JSON structure of the response from OpenAI
@@ -77,6 +79,11 @@ type ThreadMessage struct {
 
 // CreateThread creates a new thread using the OpenAI API
 func CreateThread() (*ThreadResponse, error) {
+    err := godotenv.Load()
+    if err != nil {
+        return nil, fmt.Errorf("error loading .env file: %w", err)
+    }
+
     apiKey := os.Getenv("GPT_API_KEY")
     if apiKey == "" {
         return nil, fmt.Errorf("API key not set")
@@ -175,10 +182,15 @@ func CreateThreadMessage(threadID, content string) (*ThreadMessageResponse, erro
 }
 
 // CreateThreadRun creates a run in a specified thread
-func CreateThreadRun(threadID, assistantID string) (*ThreadRunResponse, error) {
+func CreateThreadRun(threadID string) (*ThreadRunResponse, error) {
     apiKey := os.Getenv("GPT_API_KEY")
     if apiKey == "" {
         return nil, fmt.Errorf("API key not set")
+    }
+
+    assistantID := os.Getenv("GPT_ASST_ID")
+    if assistantID == "" {
+        return nil, fmt.Errorf("Engine ID is not set in environment variables")
     }
 
     url := fmt.Sprintf("https://api.openai.com/v1/threads/%s/runs", threadID)
@@ -253,11 +265,12 @@ func ListThreadMessages(threadID string) (*ThreadMessagesResponse, error) {
         return nil, fmt.Errorf("error reading response body: %w", err)
     }
 
-	fmt.Println("ListThreadMessages:")
-	print(string(body))
-	println("")
-	println("")
-	println("")
+	// for debugging
+	// fmt.Println("ListThreadMessages:")
+	// print(string(body))
+	// println("")
+	// println("")
+	// println("")
 	
     var threadMessagesResponse ThreadMessagesResponse
     err = json.Unmarshal(body, &threadMessagesResponse)
@@ -283,7 +296,7 @@ func HasValidAssistantResponse(response *ThreadMessagesResponse) bool {
 }
 
 func GetMessages(threadID string) (*ThreadMessagesResponse) {
-	time.Sleep(15 * time.Second)
+	time.Sleep(10 * time.Second)
 	for {
 		messageResponse, _ := ListThreadMessages(threadID)
 		runs, err := ListThreadRuns(threadID)
@@ -307,8 +320,7 @@ func GetMessages(threadID string) (*ThreadMessagesResponse) {
 							}
 						}
 					}
-
-                    return messageResponse
+					return messageResponse
                 }
             }
         }
@@ -331,7 +343,6 @@ func GetMessages(threadID string) (*ThreadMessagesResponse) {
 							}
 						}
 					}
-
                     return messageResponse
                 }
             }
@@ -340,4 +351,26 @@ func GetMessages(threadID string) (*ThreadMessagesResponse) {
 		time.Sleep(5 * time.Second)
 	}
 
+}
+
+func SendMessages(threadID string, message string) (string, error) {
+    _, err := CreateThreadMessage(threadID, message)
+    if err != nil {
+        fmt.Println("Error:", err)
+        return "", err
+    }
+
+    // Run the assistant
+    _, err = CreateThreadRun(threadID)
+    if err != nil {
+        fmt.Println("Error:", err)
+        return "", err
+    }
+
+    // Get the messages
+    messages := GetMessages(threadID)
+    print("Messages:")
+    print(messages)
+
+    return messages.Data[0].Content[0].Text.Value, nil
 }
