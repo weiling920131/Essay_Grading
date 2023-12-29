@@ -99,9 +99,5 @@ func main() {
     }
     for _, run := range runs.Data {
         fmt.Printf("Run ID: %s, Status: %s\n", run.ID, run.Status)
-    }
-
-    
-
-    
+    }    
 }
