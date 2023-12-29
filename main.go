@@ -1,14 +1,14 @@
 package main
 
 import (
-    "bufio"
-    "fmt"
-    "log"
-    "os"
-    "time"
+	"bufio"
+	"fmt"
+	"log"
+	"os"
 
-    "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 )
+
 
 func main() {
     // Load environment variables from .env file
@@ -17,87 +17,58 @@ func main() {
         log.Fatalf("Error loading .env file: %v", err)
     }
 
-    // Retrieve API key from environment variables
-    apiKey := os.Getenv("GPT_API_KEY")
-    if apiKey == "" {
-        log.Fatal("API key is not set in environment variables")
+    // Retrieve assistant ID from environment variables
+    asstID := os.Getenv("GPT_ASST_ID")
+    if asstID == "" {
+        log.Fatal("Engine ID is not set in environment variables")
     }
+    
+    essayContent := "In this time and age, with the social media taking the world by storm, “emoji” gradually becomes an indispensable part of our everyday lives. When it comes to people’s love for emoji, there are several possible reasons that contribute to the phenomenon. First and foremost, people nowadays tend to lead a life packed with heavy workloads. Therefore, with emoji at hand, people are capable of delivering their feelings and thoughts without spending a great amount of time. Furthermore, emoji is simple but vivid. It makes it possible for the users to directly convey their messages with an intriguing facial expression. For instance, when elation and ecstasy run through my veins, Picture 1 would function greatly to visualize my feelings. Moreover, when I have a conflict with my friends with waves of indignation and wrath attacking me one after another, Picture 2 would become the best choice to display what I feel. On a whole, the use of emoji brings convenience to our lives and people may therefore consider it flawless when communicating, however, there is more to it than meets the eyes. As a matter of fact, emoji tends to give rise to misunderstandings and confusions in many cases. I had a pertinent experience in the past. It was the day that I partaked in a speech contest in which I got a good grade after months of training and toil. The moment I got informed of the fascinating news, Picture 3 was what I delivered immediately to my friend. Nevertheless, he didn’t response to me. He told me on the subsequent day that when receiving the smiling face with tears welling in the eyes, he could not determine whether I was choked to tears in melancholy or smiling with tears. In order to wrestle with the problem, the following are the solutions. First, it is advised to attach some explanatory words to the emoji to clearly shed light on the meaning. Second, if the receiver has mistaken the meaning in the past many times, words might be a better option. Last but not least, it is essential that we should think twice before sending them and ensure that the facial expression can match our messages well. In conclusion, if we take the aforementioned preventive measures, it is possible to convey our moods with emoji without false interpretations."
 
-    // // Read the topic from topic.txt
-    // topicFile, err := os.Open("topic.txt")
-    // if err != nil {
-    //     log.Fatalf("Error opening topic file: %v", err)
-    // }
-    // defer topicFile.Close()
-
-    // scanner := bufio.NewScanner(topicFile)
-    // topicContent := ""
-    // for scanner.Scan() {
-    //     topicContent += scanner.Text() + "\n"
-    // }
-    // description := "Essay Topic: "
-    // topicContent = description + topicContent
-
-    // Read the essay from essay.txt
-    essayFile, err := os.Open("essay.txt")
-    if err != nil {
-        log.Fatalf("Error opening essay file: %v", err)
-    }
-    defer essayFile.Close()
-
-    scanner := bufio.NewScanner(essayFile)
-    essayContent := ""
-    for scanner.Scan() {
-        essayContent += scanner.Text() + "\n"
-    }
-
-    // // Check for errors during scanning
-    if err := scanner.Err(); err != nil {
-        log.Fatalf("Error reading from file: %v", err)
-    }
-
-    // API 1
+    // Create a thread
     thread, err := CreateThread()
     if err != nil {
         fmt.Println("Error:", err)
         return
     }
-
-    // Print the ID of the thread
     fmt.Printf("Thread ID: %s\n", thread.ID)
 
-    // API 2
-    _, err = CreateThreadMessage(thread.ID, essayContent)
-    if err != nil {
-        fmt.Println("Error:", err)
-        return
+    // Initialize the message (for test)
+    message := essayContent
+
+    for {
+        // Create a message
+        _, err = CreateThreadMessage(thread.ID, message)
+        if err != nil {
+            fmt.Println("Error:", err)
+            return
+        }
+
+        // Run the assistant
+        _, err = CreateThreadRun(thread.ID)
+        if err != nil {
+            fmt.Println("Error:", err)
+            return
+        }
+        
+        // Get the messages
+        messages := GetMessages(thread.ID)
+        fmt.Println("")
+        fmt.Println("Messages:")
+
+        // inverse order to get oldest messages first
+        for i := len(messages.Data) - 1; i >= 0; i-- {
+            message := messages.Data[i]
+            fmt.Printf("Role: %s\n", message.Role)
+            for _, content := range message.Content {
+                fmt.Printf("Content Value: %s\n", content.Text.Value)
+            }
+        }
+
+        // Read user input
+        fmt.Print("Ask somethine: ")
+        scanner := bufio.NewScanner(os.Stdin)
+        scanner.Scan()
+        message = scanner.Text()
     }
-
-    // fmt.Printf("Thread message created: %+v\n", threadMessage)
-
-    // API 3
-    _, err = CreateThreadRun(thread.ID, "asst_rfyem8YCJcbmaiexwlHLO4YX")
-    if err != nil {
-        fmt.Println("Error:", err)
-        return
-    }
-    
-    // add delay for 5 seconds
-    time.Sleep(5 * time.Second)
-    
-    // API 4
-    // threadID := "thread_qRFXumnhkErUDecZjuFBbRHC"
-    messages := GetMessages(thread.ID)
-
-    print(messages)
-
-    // API 5
-    runs, err := ListThreadRuns(thread.ID)
-    if err != nil {
-        fmt.Println("Error:", err)
-        print("Error:", err)
-    }
-    for _, run := range runs.Data {
-        fmt.Printf("Run ID: %s, Status: %s\n", run.ID, run.Status)
-    }    
 }
