@@ -194,7 +194,7 @@ func CreateThreadRun(threadID string) (*ThreadRunResponse, error) {
     }
 
     url := fmt.Sprintf("https://api.openai.com/v1/threads/%s/runs", threadID)
-
+    
     client := &http.Client{}
 
     requestBody, err := json.Marshal(map[string]string{
