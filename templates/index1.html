@@ -174,22 +174,24 @@
           // 例如，将响应显示在聊天历史中
           // chatHistory.innerHTML += `<div style="color: green;">Response: ${JSON.stringify(jsonResponse)}</div>`;
           const jsonString = JSON.stringify(jsonResponse);
-          const parsedData = JSON.parse(jsonString);
+          const parsedData = JSON.parse(jsonResponse);
           console.log(parsedData);
-          chatHistory.innerHTML += `<div style="color: green;">Response: ${parsedData}</div>`;
+          // chatHistory.innerHTML += `<div style="color: green;">Response: ${jsonResponse}</div>`;
           // chatHistory.innerHTML += `<div style="color: green;">Response: ${jsonString}</div>`;
           try{
             chatHistory.innerHTML += `<div style="color: black;">`;
             // chatHistory.innerHTML += `<h3>${parsedData["Grading"]["Content"]["Score"]} <h3>`;
             // chatHistory.innerHTML += `<h3>${parsedData["Content"]["Score"]} <h3>`;
-              for(const [key, value] of Object.entries(jsonResponse)){
-                chatHistory.innerHTML += `<h3>${value}</h3>`;
+              for(const [key, value] of Object.entries(parsedData)){
                 if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
                   chatHistory.innerHTML += `
-                      <h3>${key}: ${jsonString[key].Score}</h3>
-                      <pre>Rewrite: ${jsonString[key].Rewrite}</pre>
-                      <pre>Comments: ${jsonString[key].Comments}</pre>`;
-              }
+                      <h3>${key}: ${parsedData[key].Score}</h3>
+                      <pre>Rewrite: ${parsedData[key].Rewrite}</pre>
+                      <pre>Comments: ${parsedData[key].Comments}</pre>`;
+                }
+                else if(key == "Total Score"){
+                  chatHistory.innerHTML += `<h3>${value}</h3>`;
+                }
             }
             chatHistory.innerHTML += `</div>`;
           }catch(e){
