@@ -131,7 +131,7 @@ func handleThreadMessagesRequest(w http.ResponseWriter, r *http.Request) {
 	// 			AssistantID: nil,
 	// 			RunID:       nil,
 	// 			Metadata:    struct{}{},
-	// 		},
+	// 		}
 	// 	},
 	// 	FirstID: "msg_gyAl1qVHmaO2sq40xeuLOqI5",
 	// 	LastID:  "msg_WZAIdfaC8uhOfZgzLeu1ykgw",

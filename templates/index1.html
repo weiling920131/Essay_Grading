@@ -104,7 +104,7 @@
         newChatWindow.innerHTML = `<h2>Chat Window ${Object.keys(chatWindows).length + 1}</h2>
           <div id="chat-history-${Object.keys(chatWindows).length + 1}"></div>
           <input type="text" id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type a message...">
-          <input type="button" value="Send" onclick="sendMessage('${chatWindowId}', '${threadID}')">`;
+          <input type="button" value="Send" onclick="sendMessage('${chatWindowId}', '${threadID}')" id="sendButton">`;
 
         // 将新的聊天窗口添加到右侧聊天容器中
         chatContainer.appendChild(newChatWindow);
@@ -139,6 +139,7 @@
     }
 
     function sendMessage(windowId, threadID) {
+      console.log("ID", threadID)
       const userInput = document.getElementById(`user-input-${windowId.split('-')[2]}`).value;
       const chatHistory = document.getElementById(`chat-history-${windowId.split('-')[2]}`);
 
@@ -198,105 +199,22 @@
             console.log(e);
             chatHistory.innerHTML += `<div style="color: red;">${jsonString}</div>`;
           }
-          // try {
-          //   console.log(jsonString);
-          //   const parsedData = JSON.parse(jsonString);
-          //   console.log(parsedData);
-
-          //   // let formattedHtml = '<div style="color: green;">Response:<br>';
-
-          //   // for (const section in parsedData) {
-          //   //     formattedHtml += `<h3>${section}</h3>`;
-          //   //     const sectionData = parsedData[section];
-          //   //     for (const key in sectionData) {
-          //   //         formattedHtml += `<p><strong>${key}:</strong> ${sectionData[key]}</p>`;
-          //   //     }
-          //   // }
-
-          //   // formattedHtml += '</div>';
-
-          //   // chatHistory.innerHTML += formattedHtml;   
-
-          //   chatHistory.innerHTML += `<div style="color: green;"><pre>${JSON.stringify(parsedData, null, 2)}</pre></div>`;
-            
-          //   // Expected Respond Format
-          //   if (isJsonString(jsonString)) {
-          //     // Display the JSON response in the right column
-          //     const totalScore = jsonResponse["Total Holistic Score"];
-          //     const contentScore = jsonResponse.Ratings.Content.Score;
-          //     const contentRewrite = "Rewrite: " + jsonResponse.Ratings.Content.Rewrite;
-          //     const contentComments = "Comments: " + jsonResponse.Ratings.Content.Comments;
-          //     const organizationScore = jsonResponse.Ratings.Organization.Score;
-          //     const organizationRewrite = "Rewrite: " + jsonResponse.Ratings.Organization.Rewrite;
-          //     const organizationComments = "Comments: " + jsonResponse.Ratings.Organization.Comments;
-          //     const grammarScore = jsonResponse.Ratings["Grammar and Sentence Structure"].Score;
-          //     const grammarRewrite = "Rewrite: " + jsonResponse.Ratings["Grammar and Sentence Structure"].Rewrite;
-          //     const grammarComments = "Comments: " + jsonResponse.Ratings["Grammar and Sentence Structure"].Comments;
-          //     const vocabularyScore = jsonResponse.Ratings["Vocabulary and Spelling"].Score;
-          //     const vocabularyRewrite = "Rewrite: " + jsonResponse.Ratings["Vocabulary and Spelling"].Rewrite;
-          //     const vocabularyComments = "Comments: " + jsonResponse.Ratings["Vocabulary and Spelling"].Comments;
-          //     // 模拟聊天机器人回复（替换为实际响应）
-          //     const botResponse = "This is a bot response. Replace it with the actual response.";
-          //     chatHistory.innerHTML += `<div id="responseContainer">
-          //           <h2>Ratings</h2>
-          //               <h3>Total Holistic Score: ${totalScore}</h3>
-          //               <h3>Content: <span>${contentScore}</span></h3>
-          //               <pre>${contentRewrite}</pre>
-          //               <pre>${contentComments}</pre>
-          //               <h3>Organization: <span>${organizationScore}</span></h3>
-          //               <pre>${organizationRewrite}</pre>
-          //               <pre>${organizationComments}</pre>
-          //               <h3>Grammar and Sentence Structure: <span>${grammarScore}</span></h3>
-          //               <pre>${grammarRewrite}</pre>
-          //               <pre>${grammarComments}</pre>
-          //               <h3>Vocabulary and Spelling: <span>${vocabularyScore}</span></h3>
-          //               <pre>${vocabularyRewrite}</pre>
-          //               <pre>${vocabularyComments}</pre>
-          //       </div>`;
-          // } else {
-          //   chatHistory.innerHTML += `<div style="color: green;">Response: ${JSON.stringify(jsonResponse)}</div>`;
-          // }
-          // chatHistory.innerHTML += `<div style="color: green;">Response: ${JSON.stringify(jsonResponse)}</div>`;
-
-          // } catch (e) {
-          //   console.log(e);
-          //   // 如果jsonString不能解析为JSON，直接显示原始字符串
-          //   chatHistory.innerHTML += `<div style="color: red;">${jsonString}</div>`;
-          // }
 
       })
       .catch(error => {
           console.error('Error during fetch:', error);
           chatHistory.innerHTML += `<div style="color: red;">Error: ${error}</div>`;
+          fetch('http://localhost:8080/api/get-thread-id')
+          .then(response => response.json())
+          .then(data => {
+            // 存储从后端获取的ID
+            const new_threadID = data.threadID; // 假设后端返回的JSON包含threadID字段
+            // debug
+            console.log('New Thread ID:', new_threadID);
+            var button = document.getElementById('sendButton');
+            button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}')`);
+          })
       });
-
-      // Simulate receiving a JSON response from your backend
-      // var jsonResponse = {
-      //     Ratings: {
-      //         Content: {
-      //             Score: 4.5,
-      //             Rewrite: "In this day and age, social media has taken the world by storm, making emojis an indispensable part of our daily lives.",
-      //             Comments: "The essay presents a clear argument about the importance of emojis in today's society and provides reasons to support it. However, the argument could be more nuanced and detailed.",
-      //         },
-      //         Organization: {
-      //             Score: 4,
-      //             Rewrite: "Furthermore, emojis may seem flawless when used for communication, but they can actually lead to misunderstandings and confusion.",
-      //             Comments: "The essay follows a logical structure and connects paragraphs well. However, the introduction and conclusion could be stronger and more impactful.",
-      //         },
-      //         "Grammar and Sentence Structure": {
-      //             Score: 4,
-      //             Rewrite: "I had a relevant experience in the past when I participated in a speech contest and achieved a good grade after months of hard work and training.",
-      //             Comments: "The essay demonstrates a good range of sentence structures, but there are some minor grammatical errors and awkward phrasings.",
-      //         },
-      //         "Vocabulary and Spelling": {
-      //             Score: 4.5,
-      //             Rewrite: "Last but not least, it is essential that we should think twice before sending them and ensure that the facial expression can match our messages perfectly.",
-      //             Comments: "The essay uses vocabulary effectively and shows good spelling overall, but there are a few minor errors.",
-      //         },
-      //     },
-      //     "Total Holistic Score": 17,
-      // };
-
       
       // 滚动到聊天窗口底部
       chatHistory.scrollTop = chatHistory.scrollHeight;
