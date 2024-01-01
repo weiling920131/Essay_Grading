@@ -12,9 +12,15 @@
       display: flex;
     }
 
+    textarea {
+      min-height: 50px; /* 最小高度 */
+      resize: none; /* 禁止用户调整大小 */
+    }
+
     /* 左侧黑色边栏样式 */
     .sidebar {
       width: 200px;
+      height: 100vh;
       background-color: #333;
       color: #fff;
       padding: 20px;
@@ -53,6 +59,13 @@
       overflow-y: scroll;
     }
 
+    .input-container {
+      display: flex;
+      flex-direction: column; /* 垂直布局 */
+      width: 50%; /* 父容器宽度 */
+      padding: 20px;
+    }
+
     .chat-box {
       margin-bottom: 10px;
       padding: 10px;
@@ -61,6 +74,7 @@
       background-color: #fff;
       display: none; /* 默认隐藏所有聊天窗口 */
     }
+
   </style>
 </head>
 <body>
@@ -101,12 +115,15 @@
         newChatWindow.classList.add('chat-box');
         newChatWindow.id = chatWindowId;
         newChatWindow.style.display = 'none'; // 默认隐藏新窗口
+        // newChatWindow.style="text-align: center;"
         newChatWindow.innerHTML = `<h2>Chat Window ${Object.keys(chatWindows).length + 1}</h2>
           <div id="chat-history-${Object.keys(chatWindows).length + 1}"></div>
-          <input type="text" id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type a message...">
-          <input type="button" value="Send" onclick="sendMessage('${chatWindowId}', '${threadID}')" id="sendButton">`;
+          <div class="input-container">
+            <textarea id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type a message..." oninput="autoResize(this)"></textarea>
+            <button onclick="sendMessage('${chatWindowId}', '${threadID}');  resetTextarea('${chatWindowId}')" id="sendButton">Send</button>
+          </div>`;
 
-        // 将新的聊天窗口添加到右侧聊天容器中
+        // 将新的聊天窗口添加到右侧聊天容器中 
         chatContainer.appendChild(newChatWindow);
 
         // 创建对应的红色按钮
@@ -126,6 +143,16 @@
       .catch(error => {
         console.error('Error fetching the thread ID:', error);
       });
+    }
+
+    function autoResize(textarea) { 
+      textarea.style.height = 50+'px';
+      textarea.style.height = (textarea.scrollHeight) + 'px'; // 根据内容的高度重新设置输入框的高度
+    }
+
+    function resetTextarea(windowId) {
+      console.log("reset "+`user-input-${windowId.split('-')[2]}`)
+      document.getElementById(`user-input-${windowId.split('-')[2]}`).style.height = 50+'px';
     }
 
     function toggleChatWindow(windowId) {
@@ -187,8 +214,8 @@
                 if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
                   chatHistory.innerHTML += `
                       <h3>${key}: ${parsedData[key].Score}</h3>
-                      <pre>Rewrite: ${parsedData[key].Rewrite}</pre>
-                      <pre>Comments: ${parsedData[key].Comments}</pre>`;
+                      <span>Rewrite: ${parsedData[key].Rewrite}</span>
+                      <span>Comments: ${parsedData[key].Comments}</span>`;
                 }
                 else if(key == "Total Score"){
                   chatHistory.innerHTML += `<h3>${value}</h3>`;
