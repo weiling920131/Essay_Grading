@@ -57,7 +57,7 @@ func getThreadID(w http.ResponseWriter, r *http.Request) {
 // 示例API处理函数
 func handleThreadMessagesRequest(w http.ResponseWriter, r *http.Request) {
 	// 设置CORS头部
-    w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8000") // 允许前端源
+    w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8081") // 允许前端源
     w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS") // 允许的方法
     w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // 允许的头部
 
@@ -87,7 +87,7 @@ func handleThreadMessagesRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-
+	// fmt.Printf("\n\nResponse type: %T\n", response)
     // // 构建示例响应
     // response := ThreadMessagesResponse{
 	// 	Object: "list",
@@ -140,11 +140,14 @@ func handleThreadMessagesRequest(w http.ResponseWriter, r *http.Request) {
 
     // 设置响应头为JSON
     w.Header().Set("Content-Type", "application/json")
-
     // 发送JSON响应
-    if err := json.NewEncoder(w).Encode(response); err != nil {
+	jsonResponse, err := json.Marshal(response)
+    if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
-    }
+    }else{
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonResponse)
+	}
 }
 
 func main() {

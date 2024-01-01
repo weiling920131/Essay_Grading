@@ -173,36 +173,52 @@
           // 处理后端返回的数据
           // 例如，将响应显示在聊天历史中
           // chatHistory.innerHTML += `<div style="color: green;">Response: ${JSON.stringify(jsonResponse)}</div>`;
-
           const jsonString = JSON.stringify(jsonResponse);
-          chatHistory.innerHTML += `<div style="color: green;">Response: ${jsonString}</div>`;
-
+          const parsedData = JSON.parse(jsonString);
+          console.log(parsedData);
+          chatHistory.innerHTML += `<div style="color: green;">Response: ${parsedData}</div>`;
+          // chatHistory.innerHTML += `<div style="color: green;">Response: ${jsonString}</div>`;
+          try{
+            chatHistory.innerHTML += `<div style="color: black;">`;
+            // chatHistory.innerHTML += `<h3>${parsedData["Grading"]["Content"]["Score"]} <h3>`;
+            // chatHistory.innerHTML += `<h3>${parsedData["Content"]["Score"]} <h3>`;
+              for(const [key, value] of Object.entries(jsonResponse)){
+                chatHistory.innerHTML += `<h3>${value}</h3>`;
+                if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
+                  chatHistory.innerHTML += `
+                      <h3>${key}: ${jsonString[key].Score}</h3>
+                      <pre>Rewrite: ${jsonString[key].Rewrite}</pre>
+                      <pre>Comments: ${jsonString[key].Comments}</pre>`;
+              }
+            }
+            chatHistory.innerHTML += `</div>`;
+          }catch(e){
+            console.log(e);
+            chatHistory.innerHTML += `<div style="color: red;">${jsonString}</div>`;
+          }
           // try {
           //   console.log(jsonString);
           //   const parsedData = JSON.parse(jsonString);
           //   console.log(parsedData);
 
-          //   let formattedHtml = '<div style="color: green;">Response:<br>';
+          //   // let formattedHtml = '<div style="color: green;">Response:<br>';
 
-          //   for (const section in parsedData) {
-          //       formattedHtml += `<h3>${section}</h3>`;
-          //       const sectionData = parsedData[section];
-          //       for (const key in sectionData) {
-          //           formattedHtml += `<p><strong>${key}:</strong> ${sectionData[key]}</p>`;
-          //       }
-          //   }
+          //   // for (const section in parsedData) {
+          //   //     formattedHtml += `<h3>${section}</h3>`;
+          //   //     const sectionData = parsedData[section];
+          //   //     for (const key in sectionData) {
+          //   //         formattedHtml += `<p><strong>${key}:</strong> ${sectionData[key]}</p>`;
+          //   //     }
+          //   // }
 
-          //   formattedHtml += '</div>';
+          //   // formattedHtml += '</div>';
 
-          //   chatHistory.innerHTML += formattedHtml;   
+          //   // chatHistory.innerHTML += formattedHtml;   
 
           //   chatHistory.innerHTML += `<div style="color: green;"><pre>${JSON.stringify(parsedData, null, 2)}</pre></div>`;
-          // } catch (e) {
-          //   console.log(e);
-          //   // 如果jsonString不能解析为JSON，直接显示原始字符串
-          //   chatHistory.innerHTML += `<div style="color: green;">${jsonString}</div>`;
-          // }
-          // if (isJsonString(jsonString)) {
+            
+          //   // Expected Respond Format
+          //   if (isJsonString(jsonString)) {
           //     // Display the JSON response in the right column
           //     const totalScore = jsonResponse["Total Holistic Score"];
           //     const contentScore = jsonResponse.Ratings.Content.Score;
@@ -239,6 +255,13 @@
           //   chatHistory.innerHTML += `<div style="color: green;">Response: ${JSON.stringify(jsonResponse)}</div>`;
           // }
           // chatHistory.innerHTML += `<div style="color: green;">Response: ${JSON.stringify(jsonResponse)}</div>`;
+
+          // } catch (e) {
+          //   console.log(e);
+          //   // 如果jsonString不能解析为JSON，直接显示原始字符串
+          //   chatHistory.innerHTML += `<div style="color: red;">${jsonString}</div>`;
+          // }
+
       })
       .catch(error => {
           console.error('Error during fetch:', error);
@@ -246,34 +269,32 @@
       });
 
       // Simulate receiving a JSON response from your backend
-      var jsonResponse = {
-          Ratings: {
-              Content: {
-                  Score: 4.5,
-                  Rewrite: "In this day and age, social media has taken the world by storm, making emojis an indispensable part of our daily lives.",
-                  Comments: "The essay presents a clear argument about the importance of emojis in today's society and provides reasons to support it. However, the argument could be more nuanced and detailed.",
-              },
-              Organization: {
-                  Score: 4,
-                  Rewrite: "Furthermore, emojis may seem flawless when used for communication, but they can actually lead to misunderstandings and confusion.",
-                  Comments: "The essay follows a logical structure and connects paragraphs well. However, the introduction and conclusion could be stronger and more impactful.",
-              },
-              "Grammar and Sentence Structure": {
-                  Score: 4,
-                  Rewrite: "I had a relevant experience in the past when I participated in a speech contest and achieved a good grade after months of hard work and training.",
-                  Comments: "The essay demonstrates a good range of sentence structures, but there are some minor grammatical errors and awkward phrasings.",
-              },
-              "Vocabulary and Spelling": {
-                  Score: 4.5,
-                  Rewrite: "Last but not least, it is essential that we should think twice before sending them and ensure that the facial expression can match our messages perfectly.",
-                  Comments: "The essay uses vocabulary effectively and shows good spelling overall, but there are a few minor errors.",
-              },
-          },
-          "Total Holistic Score": 17,
-      };
+      // var jsonResponse = {
+      //     Ratings: {
+      //         Content: {
+      //             Score: 4.5,
+      //             Rewrite: "In this day and age, social media has taken the world by storm, making emojis an indispensable part of our daily lives.",
+      //             Comments: "The essay presents a clear argument about the importance of emojis in today's society and provides reasons to support it. However, the argument could be more nuanced and detailed.",
+      //         },
+      //         Organization: {
+      //             Score: 4,
+      //             Rewrite: "Furthermore, emojis may seem flawless when used for communication, but they can actually lead to misunderstandings and confusion.",
+      //             Comments: "The essay follows a logical structure and connects paragraphs well. However, the introduction and conclusion could be stronger and more impactful.",
+      //         },
+      //         "Grammar and Sentence Structure": {
+      //             Score: 4,
+      //             Rewrite: "I had a relevant experience in the past when I participated in a speech contest and achieved a good grade after months of hard work and training.",
+      //             Comments: "The essay demonstrates a good range of sentence structures, but there are some minor grammatical errors and awkward phrasings.",
+      //         },
+      //         "Vocabulary and Spelling": {
+      //             Score: 4.5,
+      //             Rewrite: "Last but not least, it is essential that we should think twice before sending them and ensure that the facial expression can match our messages perfectly.",
+      //             Comments: "The essay uses vocabulary effectively and shows good spelling overall, but there are a few minor errors.",
+      //         },
+      //     },
+      //     "Total Holistic Score": 17,
+      // };
 
-      
-      
       
       // 滚动到聊天窗口底部
       chatHistory.scrollTop = chatHistory.scrollHeight;

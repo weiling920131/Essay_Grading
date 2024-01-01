@@ -324,6 +324,9 @@ func GetMessages(threadID string) (*ThreadMessagesResponse) {
                 }
             }
         }
+        if len(messageResponse.Data) <= 1 {
+            continue
+        }
 		secondMessage := messageResponse.Data[1]
         if secondMessage.Role == "assistant" {
 			for _, content := range secondMessage.Content {
@@ -370,7 +373,7 @@ func SendMessages(threadID string, message string) (string, error) {
     // Get the messages
     messages := GetMessages(threadID)
     print("Messages:")
-    print(messages)
+    print(messages.Data[0].Content[0].Text.Value)
 
     return messages.Data[0].Content[0].Text.Value, nil
 }
