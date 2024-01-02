@@ -60,10 +60,12 @@
     }
 
     .input-container {
-      display: flex;
-      flex-direction: column; /* 垂直布局 */
-      width: 50%; /* 父容器宽度 */
-      padding: 20px;
+      position: absolute;
+      bottom: 0;
+      left: 75%;
+      transform: translateX(-70%);
+      text-align: center; /* 如果內容是文字，使其水平置中 */
+      width: 80%; /* 或者你想要的寬度 */
     }
 
     .chat-box {
@@ -73,6 +75,12 @@
       border-radius: 5px;
       background-color: #fff;
       display: none; /* 默认隐藏所有聊天窗口 */
+    }
+
+    .custom-textarea {
+      width: 800px;
+      rows="5"
+      /* 可以添加其他樣式 */
     }
 
   </style>
@@ -119,7 +127,7 @@
         newChatWindow.innerHTML = `<h2>Chat Window ${Object.keys(chatWindows).length + 1}</h2>
           <div id="chat-history-${Object.keys(chatWindows).length + 1}"></div>
           <div class="input-container">
-            <textarea id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type a message..." oninput="autoResize(this)"></textarea>
+            <textarea class="custom-textarea" id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type a message..." oninput="autoResize(this)"></textarea>
             <button onclick="sendMessage('${chatWindowId}', '${threadID}');  resetTextarea('${chatWindowId}')" id="sendButton">Send</button>
           </div>`;
 
@@ -166,7 +174,8 @@
     }
 
     function sendMessage(windowId, threadID) {
-      console.log("ID", threadID)
+      _error = false;
+      console.log("ID- ", threadID)
       const userInput = document.getElementById(`user-input-${windowId.split('-')[2]}`).value;
       const chatHistory = document.getElementById(`chat-history-${windowId.split('-')[2]}`);
 
@@ -181,6 +190,21 @@
           }
       }
       // 发送用户输入到后端
+      function printWait() {
+        chatHistory.innerHTML += "Analyzing"
+
+        intervalId = setInterval(() => {
+          console.log('Wait...');
+          chatHistory.innerHTML += "."
+        }, 1000); // 每秒印出一次 "Wait..."
+      }
+
+      printWait();
+
+      function stopPrintWait() {
+        clearInterval(intervalId);
+      }
+
       fetch('http://localhost:8080/api/thread-messages', {
           method: 'POST',
           headers: {
@@ -192,39 +216,57 @@
           }) // 将用户输入和线程ID作为JSON发送
       })
       .then(response => {
+          stopPrintWait();
+          chatHistory.innerHTML = "";
           if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
           }
           return response.json(); // 解析JSON响应
       })
       .then(jsonResponse => {
+        
           // 处理后端返回的数据
           // 例如，将响应显示在聊天历史中
           // chatHistory.innerHTML += `<div style="color: green;">Response: ${JSON.stringify(jsonResponse)}</div>`;
           const jsonString = JSON.stringify(jsonResponse);
-          const parsedData = JSON.parse(jsonResponse);
-          console.log(parsedData);
-          // chatHistory.innerHTML += `<div style="color: green;">Response: ${jsonResponse}</div>`;
-          // chatHistory.innerHTML += `<div style="color: green;">Response: ${jsonString}</div>`;
-          try{
-            chatHistory.innerHTML += `<div style="color: black;">`;
-            // chatHistory.innerHTML += `<h3>${parsedData["Grading"]["Content"]["Score"]} <h3>`;
-            // chatHistory.innerHTML += `<h3>${parsedData["Content"]["Score"]} <h3>`;
-              for(const [key, value] of Object.entries(parsedData)){
-                if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
-                  chatHistory.innerHTML += `
-                      <h3>${key}: ${parsedData[key].Score}</h3>
-                      <span>Rewrite: ${parsedData[key].Rewrite}</span>
-                      <span>Comments: ${parsedData[key].Comments}</span>`;
-                }
-                else if(key == "Total Score"){
-                  chatHistory.innerHTML += `<h3>${value}</h3>`;
-                }
+          try{        
+            const parsedData = JSON.parse(jsonResponse);
+            console.log(parsedData);
+            // chatHistory.innerHTML += `<div style="color: green;">Response: ${jsonResponse}</div>`;
+            // chatHistory.innerHTML += `<div style="color: green;">Response: ${jsonString}</div>`;
+            try{
+              chatHistory.innerHTML += `<div style="color: black;">`;
+              // chatHistory.innerHTML += `<h3>${parsedData["Grading"]["Content"]["Score"]} <h3>`;
+              // chatHistory.innerHTML += `<h3>${parsedData["Content"]["Score"]} <h3>`;
+                for(const [key, value] of Object.entries(parsedData)){
+                  if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
+                    chatHistory.innerHTML += `
+                        <h3>${key}: ${parsedData[key].Score}</h3>
+                        <span>Rewrite: ${parsedData[key].Rewrite}</span>
+                        <span>Comments: ${parsedData[key].Comments}</span>`;
+                  }
+                  else if(key == "Total Score"){
+                    chatHistory.innerHTML += `<h3>${value}</h3>`;
+                  }
+              }
+              chatHistory.innerHTML += `</div>`;
+            }catch(e){
+              console.log(e);
+              chatHistory.innerHTML += `<div style="color: red;">${jsonString}</div>`;
             }
-            chatHistory.innerHTML += `</div>`;
-          }catch(e){
-            console.log(e);
-            chatHistory.innerHTML += `<div style="color: red;">${jsonString}</div>`;
+          } catch (e){
+            console.log("test");
+            chatHistory.innerHTML += `<div style="color: red;">Fail to analysis essay "${userInput}"</div>`;
+            fetch('http://localhost:8080/api/get-thread-id')
+            .then(response => response.json())
+            .then(data => {
+              // 存储从后端获取的ID
+              const new_threadID = data.threadID; // 假设后端返回的JSON包含threadID字段
+              // debug
+              console.log('New Thread ID:', new_threadID);
+              var button = document.getElementById('sendButton');
+              button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}'); resetTextarea('${chatWindowId}')`);
+            })
           }
 
       })
@@ -239,15 +281,16 @@
             // debug
             console.log('New Thread ID:', new_threadID);
             var button = document.getElementById('sendButton');
-            button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}')`);
+            button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}'); resetTextarea('${chatWindowId}')`);
           })
       });
       
       // 滚动到聊天窗口底部
       chatHistory.scrollTop = chatHistory.scrollHeight;
-
       // 清空用户输入
+      // console.log(threadID+' reset input');
       document.getElementById(`user-input-${windowId.split('-')[2]}`).value = '';
+      
     }
   </script>
 </body>
