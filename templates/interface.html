@@ -191,11 +191,16 @@
       }
       // 发送用户输入到后端
       function printWait() {
-        chatHistory.innerHTML += "Analyzing"
-
+        chatHistory.innerHTML += `<span style="font-weight: bold; font-size: 40px;">Grading</span>`;
+        const strlen = chatHistory.innerHTML.length ;
         intervalId = setInterval(() => {
           console.log('Wait...');
-          chatHistory.innerHTML += "."
+          const lastChar = `<span style="font-size: 40px">.</span>`;
+          const lastCharLength = lastChar.length;
+          chatHistory.innerHTML += lastChar;
+          if(chatHistory.innerHTML.length > strlen + 3 * lastCharLength){
+            chatHistory.innerHTML = chatHistory.innerHTML.slice(0, strlen);
+          }
         }, 1000); // 每秒印出一次 "Wait..."
       }
 
@@ -227,17 +232,12 @@
         
           // 处理后端返回的数据
           // 例如，将响应显示在聊天历史中
-          // chatHistory.innerHTML += `<div style="color: green;">Response: ${JSON.stringify(jsonResponse)}</div>`;
           const jsonString = JSON.stringify(jsonResponse);
           try{        
             const parsedData = JSON.parse(jsonResponse);
             console.log(parsedData);
-            // chatHistory.innerHTML += `<div style="color: green;">Response: ${jsonResponse}</div>`;
-            // chatHistory.innerHTML += `<div style="color: green;">Response: ${jsonString}</div>`;
             try{
               chatHistory.innerHTML += `<div style="color: black;">`;
-              // chatHistory.innerHTML += `<h3>${parsedData["Grading"]["Content"]["Score"]} <h3>`;
-              // chatHistory.innerHTML += `<h3>${parsedData["Content"]["Score"]} <h3>`;
                 for(const [key, value] of Object.entries(parsedData)){
                   if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
                     chatHistory.innerHTML += `
