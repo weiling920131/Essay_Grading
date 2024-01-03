@@ -130,30 +130,27 @@
         newChatWindow.classList.add('chat-box');
         newChatWindow.id = chatWindowId;
         newChatWindow.style.display = 'none'; // 默认隐藏新窗口
-        newChatWindow.innerHTML = `<h2>Sessoin ${Object.keys(chatWindows).length + 1}</h2>
-        <div id="chat-history-${Object.keys(chatWindows).length + 1}"></div>`;
-        const inputContainer = document.createElement('div');
-        inputContainer.id = `input-container-${Object.keys(chatWindows).length + 1}`;
-        inputContainer.style = "display: flex; flex-direction: column; align-items: center; margin-top: 20px;"
-        inputContainer.innerHTML =`<textarea class="custom-textarea" id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type your essay here..." style="margin-bottom: 10px;"></textarea>
-          <button onclick="sendMessage('${chatWindowId}', '${threadID}'); resetTextarea('${chatWindowId}')" id="sendButton" style="background-color: #4CAF50; /* Green */
-          border: none;
-          color: white;
-          padding: 10px 20px;
-          text-align: center;
-          text-decoration: none;
-          display: inline-block;
-          font-size: 16px;
-          cursor: pointer;
-          margin: 10px;
-          border-radius: 5px;">Submit</button>`;
-
+        // newChatWindow.style="text-align: center;"
+        newChatWindow.innerHTML = `<h2>Chat Window ${Object.keys(chatWindows).length + 1}</h2>
+          <div id="chat-history-${Object.keys(chatWindows).length + 1}"></div>
+          <div class="input-container">
+            <textarea class="custom-textarea" id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type a message..."></textarea>
+            <button onclick="sendMessage('${chatWindowId}', '${threadID}'); resetTextarea('${chatWindowId}')" id="sendButton" style="background-color: #4CAF50; /* Green */
+              border: none;
+              color: white;
+              padding: 10px 20px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: 16px;
+              cursor: pointer;
+              margin: 10px;
+              border-radius: 5px;">Submit</button>
+          </div>`;
 
 
         // 将新的聊天窗口添加到右侧聊天容器中 
         chatContainer.appendChild(newChatWindow);
-        chatContainer.appendChild(inputContainer);
-
         // 创建对应的红色按钮
         const newChatButton = document.createElement('button');
         newChatButton.classList.add('chat-btn');
@@ -286,17 +283,17 @@
       .catch(error => {
           console.error('Error during fetch:', error);
           chatHistory.innerHTML += `<div style="color: red;">Error: ${error}</div>`;
-          fetch('http://localhost:8080/api/get-thread-id')
-          .then(response => response.json())
-          .then(data => {
-            // 存储从后端获取的ID
-            const new_threadID = data.threadID; // 假设后端返回的JSON包含threadID字段
-            // debug
-            console.log('New Thread ID:', new_threadID);
-            var button = document.getElementById('sendButton');
-            chatWindows[windowId] = { windowId: windowId, threadID: new_threadID };
-            button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}'); resetTextarea('${chatWindowId}')`);
-          })
+          // fetch('http://localhost:8080/api/get-thread-id')
+          // .then(response => response.json())
+          // .then(data => {
+          //   // 存储从后端获取的ID
+          //   const new_threadID = data.threadID; // 假设后端返回的JSON包含threadID字段
+          //   // debug
+          //   console.log('New Thread ID:', new_threadID);
+          //   var button = document.getElementById('sendButton');
+          //   chatWindows[windowId] = { windowId: windowId, threadID: new_threadID };
+          //   button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}'); resetTextarea('${chatWindowId}')`);
+          // })
       });
       
       // 滚动到聊天窗口底部
