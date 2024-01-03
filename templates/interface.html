@@ -201,7 +201,7 @@
           if(chatHistory.innerHTML.length > strlen + 3 * lastCharLength){
             chatHistory.innerHTML = chatHistory.innerHTML.slice(0, strlen);
           }
-        }, 1000); // 每秒印出一次 "Wait..."
+        }, 600); // 每秒印出一次 "Wait..."
       }
 
       printWait();
@@ -242,8 +242,8 @@
                   if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
                     chatHistory.innerHTML += `
                         <h3>${key}: ${parsedData[key].Score}</h3>
-                        <span>Rewrite: ${parsedData[key].Rewrite}</span>
-                        <span>Comments: ${parsedData[key].Comments}</span>`;
+                        <span><strong>Rewrite:</strong><br> ${parsedData[key].Rewrite}</span><br>
+                        <span><strong>Comments:</strong><br> ${parsedData[key].Comments}</span>`;
                   }
                   else if(key == "Total Score"){
                     chatHistory.innerHTML += `<h3>${value}</h3>`;
