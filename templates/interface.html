@@ -256,7 +256,7 @@
                   if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
                     chatHistory.innerHTML += `
                         <h3>${key}: ${parsedData[key].Score}</h3>
-                        <span>Rewrite: ${parsedData[key].Rewrite}</span>
+                        <span>Rewrite: ${parsedData[key].Rewrite}</span><br>
                         <span>Comments: ${parsedData[key].Comments}</span>`;
                   }
                   else if(key == "Total Score"){
@@ -270,17 +270,7 @@
             }
           } catch (e){
             console.log("test");
-            chatHistory.innerHTML += `<div style="color: red;">Fail to analysis essay "${userInput}"</div>`;
-            fetch('http://localhost:8080/api/get-thread-id')
-            .then(response => response.json())
-            .then(data => {
-              // 存储从后端获取的ID
-              const new_threadID = data.threadID; // 假设后端返回的JSON包含threadID字段
-              // debug
-              console.log('New Thread ID:', new_threadID);
-              var button = document.getElementById('sendButton');
-              button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}'); resetTextarea('${chatWindowId}')`);
-            })
+            chatHistory.innerHTML += `<div>${jsonString.slice(1, -2)}"</div>`;
           }
 
       })
