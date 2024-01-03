@@ -85,11 +85,6 @@
       /* 可以添加其他樣式 */
     }
 
-    /* .chat-messages {
-    
-    } */
-
-
   </style>
 </head>
 <body>
@@ -131,7 +126,7 @@
         newChatWindow.id = chatWindowId;
         newChatWindow.style.display = 'none'; // 默认隐藏新窗口
         // newChatWindow.style="text-align: center;"
-        newChatWindow.innerHTML = `<h2>Chat Window ${Object.keys(chatWindows).length + 1}</h2>
+        newChatWindow.innerHTML = `<h1>Chat Window ${Object.keys(chatWindows).length + 1}</h1>
           <div id="chat-history-${Object.keys(chatWindows).length + 1}"></div>
           <div class="input-container">
             <textarea class="custom-textarea" id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type a message..."></textarea>
@@ -198,7 +193,7 @@
 
       // 显示用户消息
       const formattedUserInput = userInput.split('\n').map(paragraph => `<p>${paragraph}</p>`).join('');
-      chatHistory.innerHTML += `<div style="text-align: left; color: black;"><strong>You</strong>: ${formattedUserInput}</div>`;
+      chatHistory.innerHTML += `<div style="text-align: left; color: black;"><h2><strong>You</strong>: </h2>${formattedUserInput}</div>`;
       function isJsonString(str) {
           try {
               JSON.parse(str);
@@ -210,22 +205,27 @@
       const history_length = chatHistory.innerHTML.length;
       // 发送用户输入到后端
       function printWait() {
-        chatHistory.innerHTML += `<span style="font-weight: bold; font-size: 40px;">Grading</span>`;
+        gradingstr = `<span style="font-weight: bold; font-size: 40px;">Grading</span>`;
+        const gradingstr_length = gradingstr.length;
+        const lastChar = `<span style="font-size: 40px">.</span>`;
+        const lastCharLength = lastChar.length;
         const strlen = chatHistory.innerHTML.length ;
         intervalId = setInterval(() => {
           console.log('Wait...');
-          const lastChar = `<span style="font-size: 40px">.</span>`;
-          const lastCharLength = lastChar.length;
-          chatHistory.innerHTML += lastChar;
-          if(chatHistory.innerHTML.length > strlen + 3 * lastCharLength){
-            chatHistory.innerHTML = chatHistory.innerHTML.slice(0, strlen);
+          chatHistory.innerHTML = chatHistory.innerHTML.slice(0, strlen);
+          gradingstr += lastChar;
+          chatHistory.innerHTML += gradingstr;
+          if(chatHistory.innerHTML.length > strlen + gradingstr_length + 3 * lastCharLength){
+            chatHistory.innerHTML = chatHistory.innerHTML.slice(0, strlen + gradingstr_length);
+            gradingstr = gradingstr.slice(0, gradingstr_length);
           }
         }, 600); // 每秒印出一次 "Wait..."
       }
 
       printWait();
-
       function stopPrintWait() {
+        chatHistory.innerHTML = chatHistory.innerHTML.slice(0, history_length);
+        chatHistory.innerHTML += `<div style="text-align: left; color: black;"><br><h2><strong>Result</strong>:</h2></div>`;
         clearInterval(intervalId);
       }
 
@@ -241,8 +241,6 @@
       })
       .then(response => {
           stopPrintWait();
-          // chatHistory.innerHTML ="";
-          // chatHistory.innerHTML = chatHistory.innerHTML.slice(0, history_length);
           if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
           }
