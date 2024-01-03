@@ -270,7 +270,7 @@
                   }
               }
               chatHistory.innerHTML += `</div>`;
-              var chatbox = document.getElementById(`chat-box-${chatWindows}`);
+              var chatbox = document.getElementById(`chat-box-${windowId.split('-')[2]}`);
               chatbox.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
             }catch(e){
               console.log(e);
