@@ -261,12 +261,12 @@
                 for(const [key, value] of Object.entries(parsedData)){
                   if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
                     chatHistory.innerHTML += `
-                        <h3>${key}: ${parsedData[key].Score}</h3>
+                        <h3>${key}: ${parsedData[key].Score} / 5.0</h3>
                         <span><strong>Rewrite:</strong><br> ${parsedData[key].Rewrite}</span><br>
                         <span><strong>Comments:</strong><br> ${parsedData[key].Comments}</span>`;
                   }
                   else if(key == "Total Score"){
-                    chatHistory.innerHTML += `<h3>Total Score: ${value}</h3>`;
+                    chatHistory.innerHTML += `<h3>Total Score: ${value} / 20.0</h3>`;
                   }
               }
               chatHistory.innerHTML += `</div>`;
