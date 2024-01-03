@@ -57,6 +57,8 @@
       padding: 20px;
       background-color: #f4f4f4;
       overflow-y: scroll;
+      height: 550px; /* 设置滚动窗口的高度 */
+      border: 1px solid #ccc; /* 边框样式 */
     }
 
     .input-container {
@@ -82,6 +84,11 @@
       rows="5";
       /* 可以添加其他樣式 */
     }
+
+    /* .chat-messages {
+    
+    } */
+
 
   </style>
 </head>
@@ -194,7 +201,7 @@
 
       // 显示用户消息
       const formattedUserInput = userInput.split('\n').map(paragraph => `<p>${paragraph}</p>`).join('');
-      chatHistory.innerHTML += `<div style="text-align: left; color: black;">Pending Essay: ${formattedUserInput}</div>`;
+      chatHistory.innerHTML += `<div style="text-align: left; color: black;"><strong>You</strong>: ${formattedUserInput}</div>`;
       function isJsonString(str) {
           try {
               JSON.parse(str);
@@ -203,6 +210,7 @@
               return false;
           }
       }
+      const history_length = chatHistory.innerHTML.length;
       // 发送用户输入到后端
       function printWait() {
         chatHistory.innerHTML += `<span style="font-weight: bold; font-size: 40px;">Grading</span>`;
@@ -215,7 +223,7 @@
           if(chatHistory.innerHTML.length > strlen + 3 * lastCharLength){
             chatHistory.innerHTML = chatHistory.innerHTML.slice(0, strlen);
           }
-        }, 1000); // 每秒印出一次 "Wait..."
+        }, 600); // 每秒印出一次 "Wait..."
       }
 
       printWait();
@@ -236,7 +244,8 @@
       })
       .then(response => {
           stopPrintWait();
-          chatHistory.innerHTML = "";
+          // chatHistory.innerHTML ="";
+          // chatHistory.innerHTML = chatHistory.innerHTML.slice(0, history_length);
           if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -256,8 +265,8 @@
                   if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
                     chatHistory.innerHTML += `
                         <h3>${key}: ${parsedData[key].Score}</h3>
-                        <span>Rewrite: ${parsedData[key].Rewrite}</span>
-                        <span>Comments: ${parsedData[key].Comments}</span>`;
+                        <span><strong>Rewrite:</strong><br> ${parsedData[key].Rewrite}</span><br>
+                        <span><strong>Comments:</strong><br> ${parsedData[key].Comments}</span>`;
                   }
                   else if(key == "Total Score"){
                     chatHistory.innerHTML += `<h3>${value}</h3>`;
@@ -270,17 +279,7 @@
             }
           } catch (e){
             console.log("test");
-            chatHistory.innerHTML += `<div style="color: red;">Fail to analysis essay "${userInput}"</div>`;
-            fetch('http://localhost:8080/api/get-thread-id')
-            .then(response => response.json())
-            .then(data => {
-              // 存储从后端获取的ID
-              const new_threadID = data.threadID; // 假设后端返回的JSON包含threadID字段
-              // debug
-              console.log('New Thread ID:', new_threadID);
-              var button = document.getElementById('sendButton');
-              button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}'); resetTextarea('${chatWindowId}')`);
-            })
+            chatHistory.innerHTML += `<div>${jsonString.slice(1, -2)}"</div>`;
           }
 
       })
@@ -295,12 +294,13 @@
             // debug
             console.log('New Thread ID:', new_threadID);
             var button = document.getElementById('sendButton');
+            chatWindows[windowId] = { windowId: windowId, threadID: new_threadID };
             button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}'); resetTextarea('${chatWindowId}')`);
           })
       });
       
       // 滚动到聊天窗口底部
-      chatHistory.scrollTop = chatHistory.scrollHeight;
+      // chatHistory.scrollTop = chatHistory.scrollHeight;
       // 清空用户输入
       // console.log(threadID+' reset input');
       document.getElementById(`user-input-${windowId.split('-')[2]}`).value = '';
