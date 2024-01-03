@@ -152,7 +152,7 @@
 
         // 将新的聊天窗口添加到右侧聊天容器中 
         chatContainer.appendChild(newChatWindow);
-        newChatWindow.appendChild(inputContainer);
+        chatContainer.appendChild(inputContainer);
 
         // 创建对应的红色按钮
         const newChatButton = document.createElement('button');
@@ -277,17 +277,7 @@
             }
           } catch (e){
             console.log("test");
-            chatHistory.innerHTML += `<div style="color: red;">Fail to analysis essay "${userInput}"</div>`;
-            fetch('http://localhost:8080/api/get-thread-id')
-            .then(response => response.json())
-            .then(data => {
-              // 存储从后端获取的ID
-              const new_threadID = data.threadID; // 假设后端返回的JSON包含threadID字段
-              // debug
-              console.log('New Thread ID:', new_threadID);
-              var button = document.getElementById('sendButton');
-              button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}'); resetTextarea('${chatWindowId}')`);
-            })
+            chatHistory.innerHTML += `<div>${jsonString.slice(1, -2)}"</div>`;
           }
 
       })
