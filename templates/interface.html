@@ -57,6 +57,8 @@
       padding: 20px;
       background-color: #f4f4f4;
       overflow-y: scroll;
+      height: 300px; /* 设置滚动窗口的高度 */
+      border: 1px solid #ccc; /* 边框样式 */
     }
 
     .input-container {
@@ -82,6 +84,11 @@
       rows="5";
       /* 可以添加其他樣式 */
     }
+
+    /* .chat-messages {
+    
+    } */
+
 
   </style>
 </head>
@@ -194,7 +201,7 @@
 
       // 显示用户消息
       const formattedUserInput = userInput.split('\n').map(paragraph => `<p>${paragraph}</p>`).join('');
-      chatHistory.innerHTML += `<div style="text-align: left; color: black;">Pending Essay: ${formattedUserInput}</div>`;
+      chatHistory.innerHTML += `<div style="text-align: left; color: black;">You: ${formattedUserInput}</div>`;
       function isJsonString(str) {
           try {
               JSON.parse(str);
@@ -300,7 +307,7 @@
       });
       
       // 滚动到聊天窗口底部
-      chatHistory.scrollTop = chatHistory.scrollHeight;
+      // chatHistory.scrollTop = chatHistory.scrollHeight;
       // 清空用户输入
       // console.log(threadID+' reset input');
       document.getElementById(`user-input-${windowId.split('-')[2]}`).value = '';
