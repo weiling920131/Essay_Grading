@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-    "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 )
 
 // ThreadResponse represents the JSON structure of the response from OpenAI
@@ -295,7 +295,7 @@ func HasValidAssistantResponse(response *ThreadMessagesResponse) bool {
     return false
 }
 
-func GetMessages(threadID string) (*ThreadMessagesResponse) {
+func GetMessages(threadID string) (*ThreadMessagesResponse, int) {
 	time.Sleep(10 * time.Second)
 	for {
 		messageResponse, _ := ListThreadMessages(threadID)
@@ -318,9 +318,10 @@ func GetMessages(threadID string) (*ThreadMessagesResponse) {
 							} else {
 								fmt.Println("Run canceled successfully")
 							}
+                            return messageResponse, 1
 						}
 					}
-					return messageResponse
+					return messageResponse, 0
                 }
             }
         }
@@ -344,9 +345,10 @@ func GetMessages(threadID string) (*ThreadMessagesResponse) {
 							} else {
 								fmt.Println("Run canceled successfully")
 							}
+                            return messageResponse, 1
 						}
 					}
-                    return messageResponse
+                    return messageResponse, 0
                 }
             }
         }
@@ -371,9 +373,13 @@ func SendMessages(threadID string, message string) (string, error) {
     }
 
     // Get the messages
-    messages := GetMessages(threadID)
+    messages, ifcancel := GetMessages(threadID)
     print("Messages:")
-    print(messages.Data[0].Content[0].Text.Value)
-
-    return messages.Data[0].Content[0].Text.Value, nil
+    if ifcancel == 1 {
+        print(messages.Data[1].Content[0].Text.Value)
+        return messages.Data[1].Content[0].Text.Value, nil
+    } else{
+        print(messages.Data[0].Content[0].Text.Value)
+        return messages.Data[0].Content[0].Text.Value, nil
+    }
 }
