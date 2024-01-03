@@ -79,7 +79,7 @@
 
     .custom-textarea {
       width: 800px;
-      rows="5"
+      rows="5";
       /* 可以添加其他樣式 */
     }
 
@@ -88,13 +88,13 @@
 <body>
   <div class="sidebar" id="sidebar">
     <!-- 左侧黑色边栏内容 -->
-    <button class="add-chat-btn" onclick="addChatWindow()">Add Chat Window</button>
+    <button class="add-chat-btn" onclick="addChatWindow()">Add Grading Session</button>
   </div>
 
   <div class="chat-container" id="chatContainer">
     <!-- 右侧聊天窗口 -->
     <div id="chatGPT" class="chat-box" style="display: block;">
-      <h2>Welcome to ChatGPT!</h2>
+      <h2>Welcome to Essay Grader!</h2>
       <p>Select a conversation on the left.</p>
     </div>
     <!-- 这里将动态生成聊天窗口 -->
@@ -123,21 +123,34 @@
         newChatWindow.classList.add('chat-box');
         newChatWindow.id = chatWindowId;
         newChatWindow.style.display = 'none'; // 默认隐藏新窗口
-        // newChatWindow.style="text-align: center;"
-        newChatWindow.innerHTML = `<h2>Chat Window ${Object.keys(chatWindows).length + 1}</h2>
-          <div id="chat-history-${Object.keys(chatWindows).length + 1}"></div>
-          <div class="input-container">
-            <textarea class="custom-textarea" id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type a message..." oninput="autoResize(this)"></textarea>
-            <button onclick="sendMessage('${chatWindowId}', '${threadID}');  resetTextarea('${chatWindowId}')" id="sendButton">Send</button>
-          </div>`;
+        newChatWindow.innerHTML = `<h2>Sessoin ${Object.keys(chatWindows).length + 1}</h2>
+        <div id="chat-history-${Object.keys(chatWindows).length + 1}"></div>`;
+        const inputContainer = document.createElement('div');
+        inputContainer.id = `input-container-${Object.keys(chatWindows).length + 1}`;
+        inputContainer.style = "display: flex; flex-direction: column; align-items: center; margin-top: 20px;"
+        inputContainer.innerHTML =`<textarea class="custom-textarea" id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type your essay here..." oninput="autoResize(this)" style="margin-bottom: 10px;"></textarea>
+          <button onclick="sendMessage('${chatWindowId}', '${threadID}'); resetTextarea('${chatWindowId}')" id="sendButton" style="background-color: #4CAF50; /* Green */
+          border: none;
+          color: white;
+          padding: 10px 20px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
+          cursor: pointer;
+          margin: 10px;
+          border-radius: 5px;">Submit</button>`;
+
+
 
         // 将新的聊天窗口添加到右侧聊天容器中 
         chatContainer.appendChild(newChatWindow);
+        newChatWindow.appendChild(inputContainer);
 
         // 创建对应的红色按钮
         const newChatButton = document.createElement('button');
         newChatButton.classList.add('chat-btn');
-        newChatButton.textContent = `Window ${Object.keys(chatWindows).length + 1}`;
+        newChatButton.textContent = `Sessoin ${Object.keys(chatWindows).length + 1}`;
         sidebar.appendChild(newChatButton);
 
         // 为新按钮添加点击事件，用于显示对应的聊天窗口
@@ -180,7 +193,8 @@
       const chatHistory = document.getElementById(`chat-history-${windowId.split('-')[2]}`);
 
       // 显示用户消息
-      chatHistory.innerHTML += `<div style="text-align: right; color: #007bff;">You: ${userInput}</div>`;
+      const formattedUserInput = userInput.split('\n').map(paragraph => `<p>${paragraph}</p>`).join('');
+      chatHistory.innerHTML += `<div style="text-align: left; color: black;">Pending Essay: ${formattedUserInput}</div>`;
       function isJsonString(str) {
           try {
               JSON.parse(str);
