@@ -377,6 +377,8 @@ func SendMessages(threadID string, message string) (string, error) {
     print("Messages:")
     if ifcancel == 1 {
         print(messages.Data[1].Content[0].Text.Value)
+        // replace '\n' with ' '
+        messages.Data[1].Content[0].Text.Value = strings.Replace(messages.Data[1].Content[0].Text.Value, "\n", " ", -1)
         return messages.Data[1].Content[0].Text.Value, nil
     } else{
         print(messages.Data[0].Content[0].Text.Value)
