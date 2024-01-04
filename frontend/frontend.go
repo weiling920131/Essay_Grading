@@ -15,11 +15,11 @@ func main() {
 	r.Static("/static", "./static")
 
 	// 设置HTML模板文件夹
-	r.LoadHTMLGlob("templates/*")
+	r.LoadHTMLGlob("../templates/*")
 
 	// 定义首页路由
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index1.html", nil)
+		c.HTML(http.StatusOK, "interface.html", nil)
 	})
 
 	// 启动Web服务

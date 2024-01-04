@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot Interface</title>
+  <style>
+    /* CSS 样式 */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+    }
+
+    textarea {
+      min-height: 50px; /* 最小高度 */
+      resize: none; /* 禁止用户调整大小 */
+    }
+
+    /* 左侧黑色边栏样式 */
+    .sidebar {
+      width: 200px;
+      height: 100vh;
+      background-color: #333;
+      color: #fff;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* 绿色按钮样式 */
+    .add-chat-btn {
+      margin-bottom: 10px;
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: block;
+    }
+
+    /* 红色按钮样式 */
+    .chat-btn {
+      margin-bottom: 5px;
+      padding: 5px 10px;
+      background-color: #FF0000;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: block;
+    }
+
+    /* 右侧聊天窗口样式 */
+    .chat-container {
+      flex: 1;
+      padding: 20px;
+      background-color: #f4f4f4;
+      overflow-y: scroll;
+      height: 550px; /* 设置滚动窗口的高度 */
+      border: 1px solid #ccc; /* 边框样式 */
+    }
+
+    .input-container {
+      position: fixed;
+      bottom: 0;
+      left: 75%;
+      transform: translateX(-70%);
+      text-align: center; /* 如果內容是文字，使其水平置中 */
+      width: 80%; /* 或者你想要的寬度 */
+    }
+
+    .chat-box {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      display: none; /* 默认隐藏所有聊天窗口 */
+    }
+
+    .custom-textarea {
+      width: 800px;
+      rows="5";
+      /* 可以添加其他樣式 */
+    }
+
+  </style>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <!-- 左侧黑色边栏内容 -->
+    <button class="add-chat-btn" onclick="addChatWindow()">Add Grading Session</button>
+  </div>
+
+  <div class="chat-container" id="chatContainer">
+    <!-- 右侧聊天窗口 -->
+    <div id="chatGPT" class="chat-box" style="display: block;">
+      <h2>Welcome to Essay Grader!</h2>
+      <p>Select a conversation on the left.</p>
+    </div>
+    <!-- 这里将动态生成聊天窗口 -->
+  </div>
+
+  <script>
+    const chatWindows = {}; // 用于存储已创建的聊天窗口
+
+    function addChatWindow() {
+      const chatContainer = document.getElementById('chatContainer');
+      const sidebar = document.getElementById('sidebar');
+      // 创建新的聊天窗口
+      const chatWindowId = `chat-box-${Object.keys(chatWindows).length + 1}`;
+
+      // 从后端获取ID
+      fetch('http://localhost:8080/api/get-thread-id')
+      .then(response => response.json())
+      .then(data => {
+        // 存储从后端获取的ID
+        const threadID = data.threadID; // 假设后端返回的JSON包含threadID字段
+
+        // debug
+        console.log('Thread ID:', threadID);
+
+        const newChatWindow = document.createElement('div');
+        newChatWindow.classList.add('chat-box');
+        newChatWindow.id = chatWindowId;
+        newChatWindow.style.display = 'none'; // 默认隐藏新窗口
+        // newChatWindow.style="text-align: center;"
+        newChatWindow.innerHTML = `<h1>Chat Window ${Object.keys(chatWindows).length + 1}</h1>
+          <div id="chat-history-${Object.keys(chatWindows).length + 1}"></div>
+          <div class="input-container">
+            <textarea class="custom-textarea" id="user-input-${Object.keys(chatWindows).length + 1}" placeholder="Type a message..."></textarea>
+            <button onclick="sendMessage('${chatWindowId}', '${threadID}'); resetTextarea('${chatWindowId}')" id="sendButton" style="background-color: #4CAF50; /* Green */
+              border: none;
+              color: white;
+              padding: 10px 20px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: 16px;
+              cursor: pointer;
+              margin: 10px;
+              border-radius: 5px;">Submit</button>
+          </div>`;
+
+
+        // 将新的聊天窗口添加到右侧聊天容器中 
+        chatContainer.appendChild(newChatWindow);
+        // 创建对应的红色按钮
+        const newChatButton = document.createElement('button');
+        newChatButton.classList.add('chat-btn');
+        newChatButton.textContent = `Session ${Object.keys(chatWindows).length + 1}`;
+        sidebar.appendChild(newChatButton);
+
+        // 为新按钮添加点击事件，用于显示对应的聊天窗口
+        newChatButton.addEventListener('click', function() {
+          toggleChatWindow(chatWindowId);
+        });
+
+        chatWindows[chatWindowId] = { windowId: chatWindowId, threadID: threadID };
+        toggleChatWindow(chatWindowId);
+      })
+      .catch(error => {
+        console.error('Error fetching the thread ID:', error);
+      });
+    }
+
+    function autoResize(textarea) { 
+      textarea.style.height = 50+'px';
+      textarea.style.height = (textarea.scrollHeight) + 'px'; // 根据内容的高度重新设置输入框的高度
+    }
+
+    function resetTextarea(windowId) {
+      console.log("reset "+`user-input-${windowId.split('-')[2]}`)
+      document.getElementById(`user-input-${windowId.split('-')[2]}`).style.height = 50+'px';
+    }
+
+    function toggleChatWindow(windowId) {
+      const chatWindowsElements = document.querySelectorAll('.chat-box');
+      chatWindowsElements.forEach(window => {
+        window.style.display = 'none';
+      });
+
+      const selectedWindow = document.getElementById(windowId);
+      selectedWindow.style.display = 'block';
+    }
+
+    function sendMessage(windowId, threadID) {
+      _error = false;
+      console.log("ID- ", threadID)
+      const userInput = document.getElementById(`user-input-${windowId.split('-')[2]}`).value;
+      const chatHistory = document.getElementById(`chat-history-${windowId.split('-')[2]}`);
+
+      // 显示用户消息
+      const formattedUserInput = userInput.split('\n').map(paragraph => `<p>${paragraph}</p>`).join('');
+      chatHistory.innerHTML += `<div style="text-align: left; color: black;"><h2><strong>You</strong>: </h2>${formattedUserInput}</div>`;
+      function isJsonString(str) {
+          try {
+              JSON.parse(str);
+              return true;
+          } catch (e) {
+              return false;
+          }
+      }
+      const history_length = chatHistory.innerHTML.length;
+      // 发送用户输入到后端
+      function printWait() {
+        gradingstr = `<span style="font-weight: bold; font-size: 40px;">Pending</span>`;
+        const gradingstr_length = gradingstr.length;
+        const lastChar = `<span style="font-size: 40px">.</span>`;
+        const lastCharLength = lastChar.length;
+        const strlen = chatHistory.innerHTML.length ;
+        intervalId = setInterval(() => {
+          console.log('Wait...');
+          chatHistory.innerHTML = chatHistory.innerHTML.slice(0, strlen);
+          gradingstr += lastChar;
+          chatHistory.innerHTML += gradingstr;
+          if(chatHistory.innerHTML.length > strlen + gradingstr_length + 3 * lastCharLength){
+            chatHistory.innerHTML = chatHistory.innerHTML.slice(0, strlen + gradingstr_length);
+            gradingstr = gradingstr.slice(0, gradingstr_length);
+          }
+        }, 600); // 每秒印出一次 "Wait..."
+      }
+
+      printWait();
+      function stopPrintWait() {
+        chatHistory.innerHTML = chatHistory.innerHTML.slice(0, history_length);
+        chatHistory.innerHTML += `<div style="text-align: left; color: black;"><br><h2><strong>Result</strong>:</h2></div>`;
+        clearInterval(intervalId);
+      }
+
+      fetch('http://localhost:8080/api/thread-messages', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userInput: userInput, // 用户输入
+            threadID: threadID    // 线程ID
+          }) // 将用户输入和线程ID作为JSON发送
+      })
+      .then(response => {
+          stopPrintWait();
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json(); // 解析JSON响应
+      })
+      .then(jsonResponse => {
+        
+          // 处理后端返回的数据
+          // 例如，将响应显示在聊天历史中
+          const jsonString = JSON.stringify(jsonResponse);
+          try{        
+            const parsedData = JSON.parse(jsonResponse);
+            console.log(parsedData);
+            try{
+              chatHistory.innerHTML += `<div style="color: black;">`;
+                for(const [key, value] of Object.entries(parsedData)){
+                  if(key == "Content" || key == "Organization" || key == "Grammar and Sentence Structure" || key == "Vocabulary and Spelling"){
+                    chatHistory.innerHTML += `
+                        <h3>${key}: ${parsedData[key].Score} / 5.0</h3>
+                        <span><strong>Rewrite:</strong><br> ${parsedData[key].Rewrite}</span><br>
+                        <span><strong>Comments:</strong><br> ${parsedData[key].Comments}</span>`;
+                  }
+                  else if(key == "Total Score"){
+                    chatHistory.innerHTML += `<h3>Total Score: ${value} / 20.0</h3>`;
+                  }
+              }
+              chatHistory.innerHTML += `</div>`;
+              var chatbox = document.getElementById(`chat-box-${windowId.split('-')[2]}`);
+              chatbox.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
+            }catch(e){
+              console.log(e);
+              chatHistory.innerHTML += `<div style="color: red;">${jsonString}</div>`;
+            }
+          } catch (e){
+            console.log("test");
+            const formattedUserInput = jsonString.slice(1, -2).split("\\n").map(paragraph => `<p>${paragraph}</p>`).join('');
+            chatHistory.innerHTML += `<div style="text-align: left; color: black;">${formattedUserInput}</div>`;
+          }
+
+      })
+      .catch(error => {
+          console.error('Error during fetch:', error);
+          chatHistory.innerHTML += `<div style="color: red;">Error: ${error}</div>`;
+          // fetch('http://localhost:8080/api/get-thread-id')
+          // .then(response => response.json())
+          // .then(data => {
+          //   // 存储从后端获取的ID
+          //   const new_threadID = data.threadID; // 假设后端返回的JSON包含threadID字段
+          //   // debug
+          //   console.log('New Thread ID:', new_threadID);
+          //   var button = document.getElementById('sendButton');
+          //   chatWindows[windowId] = { windowId: windowId, threadID: new_threadID };
+          //   button.setAttribute('onclick', `sendMessage('${windowId}', '${new_threadID}'); resetTextarea('${chatWindowId}')`);
+          // })
+      });
+      
+      // 滚动到聊天窗口底部
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+      // 清空用户输入
+      // console.log(threadID+' reset input');
+      document.getElementById(`user-input-${windowId.split('-')[2]}`).value = '';
+      
+    }
+  </script>
+</body>
+</html>

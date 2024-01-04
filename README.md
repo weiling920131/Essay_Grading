@@ -4,8 +4,8 @@
 
 ## Go程式設計 Final Project
 
-> 通識選修科目的期末專題，運用所學知識創造出一個以Go為基礎的應用。
-> [Proposal](https://docs.google.com/presentation/d/11GGY4Lw0LW5Q6uq3ZcIJmzgB3nfAVQQeA1dSix0CBQw/edit?usp=sharing)
+> 通識選修科目的期末專題，運用所學知識創造出一個以Go為基礎的應用。  
+> [Proposal](https://docs.google.com/presentation/d/11GGY4Lw0LW5Q6uq3ZcIJmzgB3nfAVQQeA1dSix0CBQw/edit?usp=sharing)  
 > [Presentation](https://docs.google.com/presentation/d/1mfKam9E5k1qdYLbPXrNd70etsg-hej2xrlgPTCKFb5k/edit?usp=sharing)
 
 ## 功能
