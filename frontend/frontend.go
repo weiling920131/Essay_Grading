@@ -2,7 +2,7 @@ package main
 
 import (
 	"net/http"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,5 +23,6 @@ func main() {
 	})
 
 	// 启动Web服务
-	r.Run(":8081")
+	fmt.Println("\n\nPlease click the following link:\nhttp://localhost:8083\n\n")
+	r.Run(":8083")
 }

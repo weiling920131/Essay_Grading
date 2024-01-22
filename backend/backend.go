@@ -19,7 +19,8 @@ type UserInputRequest struct {
 
 func getThreadID(w http.ResponseWriter, r *http.Request) {
 	// 设置CORS头部
-    w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8081") // 允许前端源
+    w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8083") // 允许前端源
+    // w.Header().Set("Access-Control-Allow-Origin", "http://172.18.151.49:8083") // 允许前端源
     w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS") // 允许的方法
     w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // 允许的头部
 	// 检查是否为预检请求
@@ -57,7 +58,8 @@ func getThreadID(w http.ResponseWriter, r *http.Request) {
 // 示例API处理函数
 func handleThreadMessagesRequest(w http.ResponseWriter, r *http.Request) {
 	// 设置CORS头部
-    w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8081") // 允许前端源
+    w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8083") // 允许前端源
+    // w.Header().Set("Access-Control-Allow-Origin", "http://172.18.151.49:8083") // 允许前端源
     w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS") // 允许的方法
     w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // 允许的头部
 
