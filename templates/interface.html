@@ -278,7 +278,8 @@
             }
           } catch (e){
             console.log("test");
-            chatHistory.innerHTML += `<div>${jsonString.slice(1, -2)}"</div>`;
+            const formattedUserInput = jsonString.slice(1, -2).split("\\n").map(paragraph => `<p>${paragraph}</p>`).join('');
+            chatHistory.innerHTML += `<div style="text-align: left; color: black;">${formattedUserInput}</div>`;
           }
 
       })
